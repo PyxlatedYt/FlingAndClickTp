@@ -1,0 +1,66 @@
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+
+local escMenuDebounce = false
+local debounceTime = 1  
+
+local function launchPlayer()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+
+    local launchForce = Vector3.new(0, 400, 0)
+    rootPart.Velocity = launchForce
+end
+
+local function onKeyPress(input, gameProcessedEvent)
+    if input.KeyCode == Enum.KeyCode.R 
+       and not UserInputService:GetFocusedTextBox() 
+       and not GuiService.MenuIsOpen 
+       and not escMenuDebounce then
+        launchPlayer()
+    end
+end
+
+local function onMenuToggled()
+    if GuiService.MenuIsOpen then
+        escMenuDebounce = true  
+        wait(debounceTime)       
+        escMenuDebounce = false  
+    end
+end
+
+-- Function to teleport the player
+local function teleportToMouse(mouse)
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then
+        local targetPosition = mouse.Hit.Position
+        
+        -- Move character to the target position
+        if player.Character then
+            player.Character:MoveTo(targetPosition)
+        end
+    end
+end
+
+local function setupTeleportation()
+    local mouse = player:GetMouse()
+    
+    -- Connect the Mouse Click event
+    mouse.Button1Down:Connect(function()
+        teleportToMouse(mouse)
+    end)
+end
+
+-- Set up the teleportation for the initial character
+if player.Character then
+    setupTeleportation()
+end
+
+-- Connect to the CharacterAdded event
+player.CharacterAdded:Connect(function()
+    wait(0.1)
+    setupTeleportation() -- Re-establish teleportation after respawn
+end)
+
+UserInputService.InputBegan:Connect(onKeyPress)
+GuiService:GetPropertyChangedSignal("MenuIsOpen"):Connect(onMenuToggled)
