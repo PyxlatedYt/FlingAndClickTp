@@ -9,7 +9,7 @@ local function launchPlayer()
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
-    local launchForce = Vector3.new(0, 400, 0)
+    local launchForce = Vector3.new(0, 300, 0)
     rootPart.Velocity = launchForce
 end
 
